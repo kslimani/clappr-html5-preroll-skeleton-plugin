@@ -134,6 +134,8 @@ export default class Html5PrerollPlugin extends UICorePlugin {
     console.log('Your content in 3 seconds...')
 
     // Asynchronously wait 3 seconds (simulate ad playback)
+    // Note: this setTimeout() may fail on mobile device, unless you "really" play something in <video> element.
+    // FIXME: play a short video to simulate an ad display and fix mobile user gesture requirement.
     setTimeout(() => {
       // And finally, when ad has finished, play the content
       this._playVideoContent()

@@ -3,6 +3,7 @@ import './style.sass'
 import {MOCK_MP4} from './mock-mp4'
 import playSvg from './play.svg'
 import posterSvg from './poster.svg'
+import mockAdSdk from './mock-ad-sdk'
 
 export default class Html5PrerollPlugin extends UICorePlugin {
   get name() { return 'html5-preroll-plugin' }
@@ -59,6 +60,7 @@ export default class Html5PrerollPlugin extends UICorePlugin {
       this._pluginError('Failed to get Clappr internal click-to-pause plugin')
     }
 
+    this._contentElement = this._playback.el
     this._createAdPlayer()
   }
 
@@ -66,6 +68,7 @@ export default class Html5PrerollPlugin extends UICorePlugin {
     this.core.disableMediaControl()
     this._posterPlugin.disable()
     this._clickToPausePlugin.disable()
+    this._container.stopped() // Little trick to avoid spinner plugin display
     this._container.stopListening()
   }
 
@@ -81,10 +84,6 @@ export default class Html5PrerollPlugin extends UICorePlugin {
     if (this._playback.name === 'no_op') {
       return
     }
-
-    // For example, this is Google IMA HTML5 SDK requirements
-    let contentElement = this._playback.el
-    let adContainer = this._adContainer
 
     process.nextTick(() => this._disableControls())
 
@@ -129,17 +128,10 @@ export default class Html5PrerollPlugin extends UICorePlugin {
   }
 
   _playVideoAd() {
-    // At this state, you can pass contentElement and adContainer to ad library
+    // At this state, you can pass "contentElement" and "adContainer" to ad library
     // On mobile device, it directly use contentElement (html5 video) to play video ad
-    console.log('Your content in 3 seconds...')
-
-    // Asynchronously wait 3 seconds (simulate ad playback)
-    // Note: this setTimeout() may fail on mobile device, unless you "really" play something in <video> element.
-    // FIXME: play a short video to simulate an ad display and fix mobile user gesture requirement.
-    setTimeout(() => {
-      // And finally, when ad has finished, play the content
-      this._playVideoContent()
-    }, 3000)
+    // For example, "contentElement" and "adContainer" are Google IMA HTML5 SDK requirements
+    mockAdSdk(this._contentElement, this._adContainer, () => this._playVideoContent())
   }
 
   _playVideoContent() {

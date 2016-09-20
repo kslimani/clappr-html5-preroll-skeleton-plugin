@@ -30,58 +30,53 @@ export default class Html5PrerollPlugin extends UICorePlugin {
     this.core.mediaControl.container.$el.append(this.el)
   }
 
-  _onCoreReady() {
-    // Attempt to get poster plugin
-    this._posterPlugin =  this.core.mediaControl
-      && this.core.mediaControl.container
-      && this.core.mediaControl.container.getPlugin('poster')
+  _pluginError(msg) {
+    throw new Error(this.name + ': ' + msg)
+  }
 
-    if (!this._posterPlugin) {
-      throw new Error('Failed to get Clappr internal poster plugin')
+  _onCoreReady() {
+    // Get current container (to disable bindings during ad playback)
+    this._container = this.core.getCurrentContainer()
+    if (!this._container) {
+      this._pluginError('Failed to get Clappr current container')
     }
 
-    // Attempt to get click-to-pause plugin
-    this._clickToPausePlugin =  this.core.mediaControl
-      && this.core.mediaControl.container
-      && this.core.mediaControl.container.getPlugin('click_to_pause')
+    // Get current playback (to get player element)
+    this._playback = this.core.getCurrentPlayback()
+    if (!this._playback) {
+      this._pluginError('Failed to get Clappr playback')
+    }
 
+    // Get poster plugin. (May interfere with media control)
+    this._posterPlugin = this._container.getPlugin('poster')
+    if (!this._posterPlugin) {
+      this._pluginError('Failed to get Clappr internal poster plugin')
+    }
+
+    // Get click-to-pause plugin (May interfere with advert click handling)
+    this._clickToPausePlugin = this._container.getPlugin('click_to_pause')
     if (!this._clickToPausePlugin) {
-      throw new Error('Failed to get Clappr internal click-to-pause plugin')
+      this._pluginError('Failed to get Clappr internal click-to-pause plugin')
     }
 
     this._createAdPlayer()
   }
 
   _disableControls() {
-    if (this._posterPlugin) {
-      this._posterPlugin.container.disableMediaControl()
-      this._posterPlugin.disable()
-    }
-    if (this._clickToPausePlugin) {
-      this._clickToPausePlugin.disable()
-    }
+    this.core.disableMediaControl()
+    this._posterPlugin.disable()
+    this._clickToPausePlugin.disable()
+    this._container.stopListening()
   }
 
   _enableControls() {
-    if (this._posterPlugin) {
-      this._posterPlugin.container.enableMediaControl()
-      this._posterPlugin.enable()
-    }
-    if (this._clickToPausePlugin) {
-      this._clickToPausePlugin.enable()
-    }
+    this._container.bindEvents()
+    this._clickToPausePlugin.enable()
+    this._posterPlugin.enable()
+    this.core.enableMediaControl()
   }
 
   _createAdPlayer() {
-    // Attempt to get playback
-    this._playback = this.core.mediaControl
-      && this.core.mediaControl.container
-      && this.core.mediaControl.container.playback
-
-    if (!this._playback) {
-      throw new Error('Failed to get Clappr playback')
-    }
-
     // Ensure browser can play video content
     if (this._playback.name === 'no_op') {
       return
@@ -99,7 +94,7 @@ export default class Html5PrerollPlugin extends UICorePlugin {
     if (this._playback.tagName === 'video') {
       let src = this._playback.el && this._playback.el.src
       if (!src || src.length === 0) {
-        // Ensure video element has one source loaded
+        // Ensure video element has one source loaded (expected by most of ad SDK libraries)
         this._playback.el.src = MOCK_MP4
         this._videoMock = true
       } else if (this._playback.name === 'html5_video' && !this._playback.el.hasAttribute('poster'))  {
@@ -134,11 +129,11 @@ export default class Html5PrerollPlugin extends UICorePlugin {
   }
 
   _playVideoAd() {
-    // At this state, you can pass contentElement and adContainer to AD library
+    // At this state, you can pass contentElement and adContainer to ad library
     // On mobile device, it directly use contentElement (html5 video) to play video ad
     console.log('Your content in 3 seconds...')
 
-    // Asynchronous mock (3 seconds)
+    // Asynchronously wait 3 seconds (simulate ad playback)
     setTimeout(() => {
       // And finally, when ad has finished, play the content
       this._playVideoContent()
@@ -152,9 +147,9 @@ export default class Html5PrerollPlugin extends UICorePlugin {
 
     if (this._videoMock === true) {
       this._playback.el.src = ""
-      // Reset <video> using playback stop() method
+      // Reset <video> using stop() method
       // Known issue: Poster may briefly appear on some devices
-      this._playback.stop()
+      this.core.mediaControl.stop()
     }
 
     process.nextTick(() => {

@@ -1,4 +1,4 @@
-import {UICorePlugin, Events, $} from 'clappr'
+import {UICorePlugin, Events, Browser, $} from 'clappr'
 import './style.sass'
 import {MOCK_MP4} from './mock-mp4'
 import playSvg from './play.svg'
@@ -104,8 +104,7 @@ export default class Html5PrerollPlugin extends UICorePlugin {
     }
 
     // Ad start must be done as the result of a user action on mobile
-    // Assume that device that support touch can't autostart campaign (may be wrong in some cases !)
-    if (this._forceOverlay || 'ontouchstart' in window) {
+    if (this._forceOverlay || Browser.isMobile) {
       let startAd = (e) => {
         try {
           this._clickOverlay.removeEventListener('click', startAd, false)

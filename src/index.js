@@ -77,6 +77,7 @@ export default class Html5PrerollPlugin extends UICorePlugin {
     this._clickToPausePlugin.enable()
     this._posterPlugin.enable()
     this.core.enableMediaControl()
+    this.core.mediaControl.onLoadedMetadataOnVideoTag(); // Little trick to fix iOS fullscreen button display
   }
 
   _createAdPlayer() {

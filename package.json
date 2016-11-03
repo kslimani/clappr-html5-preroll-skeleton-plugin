@@ -4,8 +4,9 @@
   "description": "HTML5 preroll ad skeleton plugin for clappr.",
   "main": "dist/clappr-html5-preroll-plugin.js",
   "scripts": {
-    "dev": "webpack",
-    "dist": "webpack -p",
+    "dist": "npm run dist-main && npm run dist-min",
+    "dist-main": "webpack --progress",
+    "dist-min": "webpack --progress -p --optimize-mangle --optimize-dedupe --output-filename clappr-html5-preroll-plugin.min.js",
     "watch": "webpack -w",
     "demo": "http-cli -r ./ -a 0.0.0.0 -p 8090",
     "check": "david"

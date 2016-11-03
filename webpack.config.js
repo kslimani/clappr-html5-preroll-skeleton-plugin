@@ -1,16 +1,31 @@
-var path = require('path');
-var webpack = require('webpack');
-var Clean = require('clean-webpack-plugin');
+var path = require('path')
+var webpack = require('webpack')
+var Clean = require('clean-webpack-plugin')
 
-var plugins = [
-  new Clean(['dist'])
-];
+var plugins = []
+var babelCompact = false
+
+if (process.env.npm_lifecycle_event === 'dist-min') {
+  // *** Uncomment the following lines to suppress UglifyJS warnings ***
+  // plugins.push(new webpack.optimize.UglifyJsPlugin({
+  //   compress: {warnings: false},
+  //   output: {comments: false}
+  // }))
+  babelCompact = true
+} else {
+  plugins.push(new Clean(['dist'], {verbose: false}))
+}
 
 module.exports = {
   entry: path.resolve(__dirname, 'src/index.js'),
   plugins: plugins,
   externals: {
-    clappr: 'Clappr',
+   clappr: {
+    amd: 'clappr',
+    commonjs: 'clappr',
+    commonjs2: 'clappr',
+    root: 'Clappr'
+   }
   },
   module: {
     loaders: [
@@ -19,12 +34,8 @@ module.exports = {
         loader: 'babel',
         exclude: /node_modules/,
         query: {
-            compact: true,
+            compact: babelCompact,
         }
-      },
-      {
-        test: /\.json$/,
-        loader: 'json-loader',
       },
       {
         test: /\.sass$/,
@@ -45,4 +56,4 @@ module.exports = {
     library: 'ClapprHtml5PrerollPlugin',
     libraryTarget: 'umd',
   },
-};
+}

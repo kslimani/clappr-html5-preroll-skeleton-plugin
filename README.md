@@ -41,12 +41,6 @@ Install dependencies :
   npm install
 ```
 
-Dev. build :
-
-```shell
-  npm run dev
-```
-
 Dist build :
 
 ```shell

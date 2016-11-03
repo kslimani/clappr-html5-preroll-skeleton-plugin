@@ -1,6 +1,6 @@
 {
   "name": "clappr-html5-preroll-skeleton-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "HTML5 preroll ad skeleton plugin for clappr.",
   "main": "dist/clappr-html5-preroll-plugin.js",
   "scripts": {

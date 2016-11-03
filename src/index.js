@@ -1,5 +1,5 @@
-import {UICorePlugin, Events, Browser, $} from 'clappr'
-import './style.sass'
+import {UICorePlugin, Events, Browser, Styler, $} from 'clappr'
+import pluginStyle from './style.sass'
 import {MOCK_MP4} from './mock-mp4'
 import playSvg from './play.svg'
 import posterSvg from './poster.svg'
@@ -171,6 +171,7 @@ export default class Html5PrerollPlugin extends UICorePlugin {
     this._$clickOverlay.find('svg').addClass('preroll-overlay-icon').attr('data-preroll', '')
     this.$el.append(this._$adContainer)
     this.$el.append(this._$clickOverlay)
+    this.$el.append(Styler.getStyleFor(pluginStyle))
     this._adContainer = this._$adContainer[0]
     this._clickOverlay = this._$clickOverlay[0]
 
